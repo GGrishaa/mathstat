@@ -1,5 +1,6 @@
 import math
 import random
+import json
 
 
 def summa(t, m):
@@ -60,6 +61,71 @@ def act3(theta):
     return theta * u
 
 
+def act5():
+    theta = 31 / 37
+    sample_sizes = [5, 10, 100, 200, 400, 600, 800, 1000]
+    num_samples = 5
+
+    result = {
+        "parameter": theta,
+        "samples": {}
+    }
+
+    for n in sample_sizes:
+        result["samples"][str(n)] = {}
+        for sample_num in range(1, num_samples + 1):
+            logarithmic_sample = [act2(theta) for _ in range(n)]
+
+            result["samples"][str(n)][str(sample_num)] = logarithmic_sample
+
+    filename = "log_samples.json"
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
+
+        def act5():
+            theta = 0.8378
+            sample_sizes = [5, 10, 100, 200, 400, 600, 800, 1000]
+            num_samples = 5
+
+            result = {
+                "parameter": theta,
+                "samples": {}
+            }
+
+            for n in sample_sizes:
+                result["samples"][str(n)] = {}
+                for sample_num in range(1, num_samples + 1):
+                    logarithmic_sample = [act2(theta) for _ in range(n)]
+
+                    result["samples"][str(n)][str(sample_num)] = logarithmic_sample
+
+            filename = "log_samples.json"
+            with open(filename, 'w', encoding='utf-8') as f:
+                json.dump(result, f, indent=2, ensure_ascii=False)
+
+
+def act6():
+    theta = 34
+    sample_sizes = [5, 10, 100, 200, 400, 600, 800, 1000]
+    num_samples = 5
+
+    result = {
+        "parameter": theta,
+        "samples": {}
+    }
+
+    for n in sample_sizes:
+        result["samples"][str(n)] = {}
+        for sample_num in range(1, num_samples + 1):
+            uniform_sample = [act3(theta) for _ in range(n)]
+
+            result["samples"][str(n)][str(sample_num)] = uniform_sample
+
+    filename = "uni_samples.json"
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(result, f, indent=2, ensure_ascii=False)
+
+
 mode = int(input("Введите режим работы:\t"))
 while mode != -1:
     if mode == 1:
@@ -76,7 +142,7 @@ while mode != -1:
             print(f'Логарифмическое распределение не может иметь параметр {theta}')
             continue
         for i in range(n - 1):
-            print(act2(theta), end=' ')
+            print(act2(theta), end=', ')
         print(act2(theta))
     elif mode == 4:
         n = int(input("Сколько элементов должно быть в выборке? Введите натуральное число:\t"))
@@ -88,8 +154,11 @@ while mode != -1:
             print(f'Равномерное распределение не может иметь параметр {theta}')
             continue
         for i in range(n - 1):
-            print(round(act3(theta), 4), end=' ')
+            print(round(act3(theta), 4), end=', ')
         print(round(act3(theta), 4))
+    elif mode == 5:
+        act5()
+        act6()
     else:
         print('Такого режима работы нету')
     mode = int(input("Введите режим работы:\t"))
