@@ -58,6 +58,18 @@ def emperic_function(sample, t):
     return s
 
 
+def log_probability(k, t):
+    if k <= 0 or k % 1 != 0.0:
+        return 0
+    return -t ** k / math.log(1 - t) / k
+
+
+def uni_probability(k, t):
+    if k > t or k < 0:
+        return 0
+    return 1 / t
+
+
 def act1():
     theta = float(input("Введите значение параметра в интервале от 0 до 1:\t"))
     if theta >= 1 or theta <= 0:
@@ -86,7 +98,7 @@ def act3(theta):
 
 
 def act5():
-    theta = 31 / 37
+    theta = log_theta
     sample_sizes = [5, 10, 100, 200, 400, 600, 800, 1000]
     num_samples = 5
 
@@ -108,7 +120,7 @@ def act5():
 
 
 def act6():
-    theta = 34
+    theta = uni_theta
     sample_sizes = [5, 10, 100, 200, 400, 600, 800, 1000]
     num_samples = 5
 
@@ -138,6 +150,8 @@ def act7(filename, n, i):
 
 
 mode = input("Введите режим работы:\t")
+log_theta = 31 / 37
+uni_theta = 34
 while mode != "-1":
     if mode == "1":
         act1()
@@ -174,8 +188,10 @@ while mode != "-1":
         l = input('Какую выборку хотите считать? Введите "л" - для логарифмического и "р" - для равномерного:\t')
         if l == 'л':
             l = "log_samples.json"
+            dist_name = "Логарифмическое"
         elif l == 'р':
             l = "uni_samples.json"
+            dist_name = "Равномерное"
         else:
             print("Нет выборки для такого распределения")
             continue
@@ -192,13 +208,14 @@ while mode != "-1":
         x = np.linspace(0, max_val, max_val * 10)
         y1 = [emperic_function(sample, i) for i in x]
         if l == "log_samples.json":
-            y2 = [log_function(i, 31/37) for i in x]
+            y2 = [log_function(i, log_theta) for i in x]
         else:
-            y2 = [uni_function(i, 34) for i in x]
-        plt.plot(x, y1, color='r', label='Эмперическая функция распределения')
+            y2 = [uni_function(i, uni_theta) for i in x]
+        plt.plot(x, y1, color='r', label='Эмпирическая функция распределения')
         plt.plot(x, y2, color='g', label='Функция распределения')
         plt.xlabel('t')
-        plt.title('График функций распределения')
+        plt.title(f'Функции распределения ({dist_name} распределение, n={n})')
+        plt.grid(True, alpha=0.3, linestyle='-', linewidth=0.5)
         plt.legend()
         plt.show()
     elif mode == "7":
@@ -236,6 +253,54 @@ while mode != "-1":
         diff = math.sqrt(int(n1) * int(n2) / (int(n1) + int(n2))) * max_dif
         print(f'Двувыборочная статистика = {diff}')
     elif mode == "8":
+        l = input('Какую выборку хотите считать? Введите "л" - для логарифмического и "р" - для равномерного:\t')
+        if l == 'л':
+            l = "log_samples.json"
+            dist_name = "Логарифмическое"
+        elif l == 'р':
+            l = "uni_samples.json"
+            dist_name = "Равномерное"
+        else:
+            print("Нет выборки для такого распределения")
+            continue
+        n = input("Какого размера выборку хотите считать?\t")
+        if int(n) not in [5, 10, 100, 200, 400, 600, 800, 1000]:
+            print(f'Нет выборки размера {n}')
+            continue
+        i = input("Какую выборку хотите взять? Введите номер от 1 до 5\t")
+        if int(i) > 5 or int(i) < 1:
+            print(f'Всего было сгенерировано по 5 выборок каждого размера, нет выборки с номером {i}')
+            continue
+        sample = act7(l, n, i)
+
+        plt.figure(figsize=(10, 6))
+        if l == "log_samples.json":
+            points = sorted(set(sample))
+            frequencies = []
+            for point in points:
+                count = 0
+                for value in sample:
+                    if value == point:
+                        count += 1
+                frequencies.append(count / len(sample))
+            plt.plot(points, frequencies, label='Полигон частот', color='r')
+            max_theoretical = int(max(sample))
+            theoretical_points = list(range(1, max_theoretical + 1))
+            probability = [log_probability(k, log_theta) for k in theoretical_points]
+            plt.stem(theoretical_points, probability, label='Функция вероятности (теоретическая)')
+        else:
+            counts, bin_edges, patches = plt.hist(sample, bins=10, density=True,
+                                                  alpha=0.7, label='Гистограмма частот')
+            bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2
+            plt.plot(bin_centers, counts, label='Полигон частот', color='r')
+            plt.hlines(y=1 / uni_theta, xmin=0, xmax=uni_theta, label='Теоретическая плотность', color='g')
+        plt.xlabel('x')
+        plt.ylabel('Относительная частота / Плотность')
+        plt.title(f'Полигон частот ({dist_name} распределение, n={n})')
+        plt.grid(True, alpha=0.3)
+        plt.legend()
+        plt.show()
+    elif mode == "9":
         l = input('Какую выборку хотите считать? Введите "л" - для логарифмического и "р" - для равномерного:\t')
         if l == 'л':
             l = "log_samples.json"
